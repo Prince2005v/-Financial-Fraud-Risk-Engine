@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import os
+import gdown
 from xgboost import XGBClassifier
 from sklearn.preprocessing import RobustScaler
 
@@ -15,9 +17,17 @@ st.markdown("Enter transaction details below to run an instant real-time AI Risk
 # ==========================================
 @st.cache_resource
 def load_ai_engine():
+    dataset_path = 'Fraud.csv'
+    
+    # Auto-download if missing (essential for cloud deployment)
+    if not os.path.exists(dataset_path):
+        with st.spinner("Downloading 6.3M Transaction Dataset... (First time only)"):
+            url = f'https://drive.google.com/uc?id=1VNpyNkGxHdskfdTNRSjjyNa5qC9u0JyV'
+            gdown.download(url, dataset_path, quiet=False)
+
     with st.spinner("Booting AI Engine & Analyzing Historical Data..."):
         # Load a small 1% chunk for rapid web-app training
-        df = pd.read_csv('Fraud.csv').sample(frac=0.01, random_state=42)
+        df = pd.read_csv(dataset_path).sample(frac=0.01, random_state=42)
         
         # Optimize
         for col in df.columns:
